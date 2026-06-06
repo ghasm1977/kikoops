@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --accent: #6c3fc5;
+  --accent-light: #f0ebfd;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --surface: #ffffff;
+  --s2: #f8f7f5;
+  --s3: #f1efe8;
+  --border: #e5e3da;
+  --text: #1a1a18;
+  --t2: #6b6b65;
+  --t3: #9b9b93;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--s2); color: var(--text); }
+
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px; }
+.btn { padding: 7px 14px; border-radius: 7px; border: 0.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 12px; font-weight: 500; transition: all .15s; }
+.btn:hover { background: var(--s3); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { opacity: .9; }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-green { background: #d1fae5; color: #065f46; }
+.badge-red { background: #fee2e2; color: #991b1b; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-purple { background: #ede9fe; color: #4c1d95; }
+.badge-gray { background: var(--s3); color: var(--t2); }
