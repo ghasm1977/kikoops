@@ -1,54 +1,16 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+# React + Vite
 
-const AuthContext = createContext(null)
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+Currently, two official plugins are available:
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else setLoading(false)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else { setProfile(null); setLoading(false) }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-  async function fetchProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data)
-    setLoading(false)
-  }
+## React Compiler
 
-  async function signIn(email, password) {
-    return supabase.auth.signInWithPassword({ email, password })
-  }
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-  async function signOut() {
-    await supabase.auth.signOut()
-  }
+## Expanding the ESLint configuration
 
-  const isAdmin = profile?.role === 'admin'
-  const isAreaManager = profile?.role === 'area_manager'
-  const isStoreManager = profile?.role === 'store_manager'
-  const isStaff = profile?.role === 'staff'
-  const canViewAllStores = isAdmin || isAreaManager
-  const storeId = profile?.store_id
-  const region = profile?.region
-
-  return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signOut, isAdmin, isAreaManager, isStoreManager, isStaff, canViewAllStores, storeId, region }}>
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-export const useAuth = () => useContext(AuthContext)
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
