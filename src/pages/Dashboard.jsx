@@ -38,10 +38,16 @@ export default function Dashboard() {
     return { month: m, actual: Math.round(act), target: Math.round(tgt) }
   })
 
+  // Fall back to most recent month that has actuals data
+  const monthsWithActuals = actuals.filter(r => r.month <= curMonth + 1 && (r.net_sales || 0) > 0).map(r => r.month)
+  const reportMonth = monthsWithActuals.length ? Math.max(...monthsWithActuals) : curMonth + 1
+  const reportMonthLabel = MONTHS[reportMonth - 1]
+  const isFallbackMonth = reportMonth !== curMonth + 1
+
   const storeRanking = STORES.map(s => {
-    const sales = actuals.filter(r => r.store_id === s.id && r.month === curMonth + 1)
+    const sales = actuals.filter(r => r.store_id === s.id && r.month === reportMonth)
       .reduce((sum, r) => sum + (r.net_sales || 0), 0)
-    const tgt = targets.filter(r => r.store_id === s.id && r.month === curMonth + 1)
+    const tgt = targets.filter(r => r.store_id === s.id && r.month === reportMonth)
       .reduce((sum, r) => sum + (r.target || 0), 0)
     return { ...s, sales, target: tgt, pct: tgt > 0 ? Math.round(sales / tgt * 100) : 0 }
   }).sort((a, b) => b.sales - a.sales)
@@ -53,6 +59,11 @@ export default function Dashboard() {
       <div style={{marginBottom:20}}>
         <h1 style={{fontSize:20,fontWeight:700}}>Dashboard</h1>
         <p style={{fontSize:12,color:'var(--t3)',marginTop:2}}>KIKO KSA · {MONTHS[curMonth]} {curYear} · 16 stores</p>
+        {isFallbackMonth && (
+          <p style={{fontSize:11,color:'var(--amber)',marginTop:4}}>
+            No actuals uploaded yet for {MONTHS[curMonth]} {curYear} — showing the latest available month ({reportMonthLabel} {curYear}) for store ranking and regions.
+          </p>
+        )}
       </div>
 
       {/* KPI cards */}
@@ -89,7 +100,7 @@ export default function Dashboard() {
         </div>
 
         <div className="card" style={{padding:16}}>
-          <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Store Ranking — {MONTHS[curMonth]}</div>
+          <div style={{fontSize:12,fontWeight:700,marginBottom:12}}>Store Ranking — {reportMonthLabel}</div>
           <div style={{overflow:'auto',maxHeight:220}}>
             {storeRanking.map((s, i) => (
               <div key={s.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'0.5px solid var(--border)'}}>
@@ -114,9 +125,9 @@ export default function Dashboard() {
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
         {['Centre','West','East'].map(reg => {
           const regStores = STORES.filter(s => s.region === reg)
-          const regSales = actuals.filter(r => regStores.some(s => s.id === r.store_id) && r.month === curMonth + 1)
+          const regSales = actuals.filter(r => regStores.some(s => s.id === r.store_id) && r.month === reportMonth)
             .reduce((s, r) => s + (r.net_sales || 0), 0)
-          const regTarget = targets.filter(r => regStores.some(s => s.id === r.store_id) && r.month === curMonth + 1)
+          const regTarget = targets.filter(r => regStores.some(s => s.id === r.store_id) && r.month === reportMonth)
             .reduce((s, r) => s + (r.target || 0), 0)
           const pct = regTarget > 0 ? Math.round(regSales / regTarget * 100) : 0
           return (
